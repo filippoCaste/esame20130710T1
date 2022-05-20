@@ -4,35 +4,40 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+
 /* DBConnect realizzata come "singleton" */
 
 public class DBConnect {
 
-	static private final String jdbcUrl = "jdbc:mysql://localhost/parole?user=root&password=root";
-	static private DBConnect instance = null ;
+	private static final String jdbcURL = "jdbc:mysql://localhost/parole";
+	private static HikariDataSource ds;
 	
-	private DBConnect () {
-		instance = this ;
-		//System.out.println("instance created") ;
-	}
-	
-	public static DBConnect getInstance() {
-		if(instance == null)
-			return new DBConnect() ;
-		else {
-			//System.out.println("instance reused") ;
-			return instance ;
+	public static Connection getConnection() {
+		
+		if (ds == null) {
+			HikariConfig config = new HikariConfig();
+			config.setJdbcUrl(jdbcURL);
+			config.setUsername("root");
+			config.setPassword("root");
+			
+			// configurazione MySQL
+			config.addDataSourceProperty("cachePrepStmts", "true");
+			config.addDataSourceProperty("prepStmtCacheSize", "250");
+			config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
+			
+			ds = new HikariDataSource(config);
 		}
-	}
-	
-	public Connection getConnection() {
+		
 		try {
-			Connection conn = DriverManager.getConnection(jdbcUrl) ;
-			return conn ;
+			
+			return ds.getConnection();
+
 		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new RuntimeException("Cannot get connection "+jdbcUrl, e) ;
-		}	
+			System.err.println("Errore connessione al DB");
+			throw new RuntimeException(e);
+		}
 	}
 
 }

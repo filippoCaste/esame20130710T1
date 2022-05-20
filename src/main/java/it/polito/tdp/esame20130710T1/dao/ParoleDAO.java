@@ -8,6 +8,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * DAO class for interacting with the "parole" data-set
@@ -29,7 +30,7 @@ public class ParoleDAO {
 		List<Parola> result = new ArrayList<Parola>();
 
 		try {
-			Connection conn = DBConnect.getInstance().getConnection();
+			Connection conn = DBConnect.getConnection();
 			PreparedStatement st = conn.prepareStatement(sql);
 			
 			ResultSet rs = st.executeQuery() ;
@@ -65,7 +66,7 @@ public class ParoleDAO {
 		List<Parola> result = new ArrayList<Parola>();
 
 		try {
-			Connection conn = DBConnect.getInstance().getConnection();
+			Connection conn = DBConnect.getConnection();
 			PreparedStatement st = conn.prepareStatement(sql);
 			st.setInt(1, length) ;
 			
@@ -87,6 +88,32 @@ public class ParoleDAO {
 		}
 
 		return result;
+	}
+
+	public void loadWordsOf(int n, Map<String, Parola> paroleMap) {
+		String sql = "SELECT * FROM parola p WHERE CHAR_LENGTH(p.nome)=? ORDER BY nome";
+		
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			
+			st.setInt(1, n);
+			
+			ResultSet res = st.executeQuery();
+			
+			while(res.next()) {
+				if(paroleMap.get(res.getString("nome"))==null) {
+					Parola p = new Parola(res.getInt("idParola"), res.getString("nome"));
+					paroleMap.put(p.getNome(), p);
+				}
+			}
+			
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Errore DB");
+		}
+		
 	}
 
 
