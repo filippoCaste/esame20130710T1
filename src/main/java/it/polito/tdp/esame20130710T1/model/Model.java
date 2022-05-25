@@ -1,14 +1,16 @@
 package it.polito.tdp.esame20130710T1.model;
 
 import java.util.ArrayList;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.jgrapht.Graph;
 import org.jgrapht.Graphs;
+import org.jgrapht.alg.shortestpath.BFSShortestPath;
+import org.jgrapht.alg.shortestpath.DijkstraShortestPath;
 import org.jgrapht.graph.DefaultEdge;
-import org.jgrapht.graph.SimpleDirectedGraph;
 import org.jgrapht.graph.SimpleGraph;
 import org.jgrapht.traverse.BreadthFirstIterator;
 
@@ -16,13 +18,11 @@ import it.polito.tdp.esame20130710T1.dao.ParoleDAO;
 
 public class Model {
 	
-	private List<Parola> parole;
 	private Map<String, Parola> paroleMap;
 	private ParoleDAO dao;
 	private Graph<Parola, DefaultEdge> graph;
 	
 	public Model() {
-		this.parole = new ArrayList<>();
 		this.dao = new ParoleDAO();
 		this.paroleMap = new HashMap<String, Parola>();
 	}
@@ -75,10 +75,19 @@ public class Model {
 	}
 	
 	public List<String> winTheMatch(String n1, String n2) {
+		
+		
+		
 		List<String> res = new ArrayList<>();
 		Parola p1 = this.paroleMap.get(n1);
 		Parola p2 = this.paroleMap.get(n2);
 		BreadthFirstIterator<Parola, DefaultEdge> it = new BreadthFirstIterator<Parola, DefaultEdge>(this.graph, p1);
+		
+		BFSShortestPath<Parola, DefaultEdge> bfs = new BFSShortestPath<>(this.graph);
+		System.out.println("\nImplementazione con BFSShortestPath:\n"+ bfs.getPaths(p1).getPath(p2));
+		
+		DijkstraShortestPath<Parola, DefaultEdge> dijk = new DijkstraShortestPath<>(graph);
+		System.out.println("\nImplementazione con Dijkstra:\n" + dijk.getPath(p1, p2));
 		
 		// guardo in ampiezza se trovo che sono collegati
 		boolean trovato = false;
